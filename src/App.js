@@ -1,52 +1,36 @@
-import React, { Component } from 'react'
-import { Auth, Hub } from 'aws-amplify'
+import Amplify, { Auth } from 'aws-amplify'
 
-import './App.css';
-import Amplify from 'aws-amplify';
-import { cognitoConstants } from './constants/auth';
-import UserContext from './UserContext';
+Amplify.configure({
+  Auth: {
+    region: 'ap-northeast-1',
+    userPoolId: 'ap-northeast-1_K4VlO24kE',
+    userPoolWebClientId: '2jlmvbk364psdq4fab3ufij2qa',
+  },
+})
 
-Amplify.configure(cognitoConstants);
+;(async () => {
+  const form = document.querySelector('.form')
+  const email = document.querySelector('.email')
+  const password = document.querySelector('.password')
 
-class App extends Component {
-  state = {
-    currentUser: {},
-    isLoaded: false
-  }
-  componentDidMount() {
-    this.updateCurrentUser()
-    Hub.listen('auth', this);
-  }
-  onHubCapsule(capsule) {
-    const { channel, payload } = capsule;
-    if (channel === 'auth' && payload.event !== 'signIn') {
-      this.updateCurrentUser()
-    }
-  }
-  updateCurrentUser = async (user) => {
-    if (user) {
-      this.setState({ currentUser: user })
-      return
-    }
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault()
+
     try {
-      const user = await Auth.currentAuthenticatedUser()
-      this.setState({ currentUser: user, isLoaded: true })
-    } catch (err) {
-      this.setState({ currentUser: null, isLoaded: true })
+      const res = await signUp(email.value, password.value)
+      console.log('Signup success. Result: ', res)
+    } catch (e) {
+      console.log('Signup fail. Error: ', e)
     }
-  }
-  render() {
-    return (
-      <UserContext.Provider value={{
-        user: this.state.currentUser,
-        updateCurrentUser: this.updateCurrentUser,
-        isLoaded: this.state.isLoaded
-      }}>
-        <div className="App">
-        </div>
-      </UserContext.Provider>
-    );
-  }
-}
+  })
+})()
 
-export default App
+async function signUp(email, password) {
+  return Auth.signUp({
+    username: email,
+    password,
+    attributes: {
+      email,
+    },
+  })
+}

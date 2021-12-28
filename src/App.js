@@ -1,6 +1,9 @@
 import logo from './logo.svg';
 import './App.css';
+import Amplify from 'aws-amplify';
+import { cognitoConstants } from './constants/auth';
 
+Amplify.configure(cognitoConstants);
 function App() {
   return (
     <div className="App">

@@ -4,8 +4,8 @@ import React, { Component } from 'react'
 Amplify.configure({
   Auth: {
     region: 'ap-northeast-1',
-    userPoolId: 'ap-northeast-1_K4VlO24kE',
-    userPoolWebClientId: '2jlmvbk364psdq4fab3ufij2qa',
+    userPoolId: 'ap-northeast-1_3LPkWycfY',
+    userPoolWebClientId: '1itlaqb60t66kij0ng3jrhi8mj',
   },
 })
 

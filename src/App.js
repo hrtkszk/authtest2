@@ -24,14 +24,12 @@ class SignUp extends React.Component {
   }
 
   signUp() {
-    const { password, email } = this.state
-
     try {
       const res = Auth.signUp({
-        username: email,
-        password,
+        username: this.state.email,
+        password: this.state.password,
         attributes: {
-          email,
+          email: this.state.email,
         },
       })
       console.log('Signup success. Result: ', res)

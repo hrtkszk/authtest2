@@ -11,7 +11,6 @@ Amplify.configure({
 
 class SignUp extends React.Component {
   state = {
-    username: '',
     password: '',
     email: ''
     // phone_number: ''
@@ -26,11 +25,8 @@ class SignUp extends React.Component {
   signUp() {
     try {
       const res = Auth.signUp({
-        username: this.state.email,
+        email: this.state.email,
         password: this.state.password,
-        attributes: {
-          email: this.state.email,
-        },
       })
       console.log('Signup success. Result: ', res)
     } catch (e) {

@@ -1,5 +1,9 @@
-import Amplify, { Auth } from 'aws-amplify'
+import Amplify from 'aws-amplify'
 import React, { Component } from 'react'
+import { Auth, Hub } from 'aws-amplify'
+
+import Router from './Router'
+import UserContext from './UserContext'
 
 Amplify.configure({
   Auth: {
@@ -9,56 +13,46 @@ Amplify.configure({
   },
 })
 
-class SignUp extends React.Component {
+class App extends Component {
   state = {
-    password: '',
-    email: ''
-    // phone_number: ''
+    currentUser: {},
+    isLoaded: false
   }
-
-  onChange = (key, value) => {
-    this.setState({
-      [key]: value
-    })
+  componentDidMount() {
+    this.updateCurrentUser()
+    Hub.listen('auth', this);
   }
-
-  signUp() {
-    try {
-      const res = Auth.signUp({
-        email: this.state.email,
-        password: this.state.password,
-      })
-      console.log('Signup success. Result: ', res)
-    } catch (e) {
-      console.log('Signup fail. Error: ', e)
+  onHubCapsule(capsule) {
+    const { channel, payload } = capsule;
+    if (channel === 'auth' && payload.event !== 'signIn') {
+      this.updateCurrentUser()
     }
   }
-
+  updateCurrentUser = async (user) => {
+    if (user) {
+      this.setState({ currentUser: user })
+      return
+    }
+    try {
+      const user = await Auth.currentAuthenticatedUser()
+      this.setState({ currentUser: user, isLoaded: true })
+    } catch (err) {
+      this.setState({ currentUser: null, isLoaded: true })
+    }
+  }
   render() {
     return (
-        <div>
-          Amplify-browser
-          <div>
-            Email:
-            <input
-                placeholder='メールアドレス'
-                onChange={evt => this.onChange('email', evt.target.value)}
-              />
-          </div>
-          <div>
-            Password:
-            <input
-                placeholder='パスワード'
-                type='password'
-                onChange={evt => this.onChange('password', evt.target.value)}
-              />
-          </div>
-          <div>
-            <button onClick={this.signUp}>Sign Up</button>
-          </div>
+      <UserContext.Provider value={{
+        user: this.state.currentUser,
+        updateCurrentUser: this.updateCurrentUser,
+        isLoaded: this.state.isLoaded
+      }}>
+        <div className="App">
+          <Router />
         </div>
-    )
+      </UserContext.Provider>
+    );
   }
 }
 
-export default SignUp
+export default App
